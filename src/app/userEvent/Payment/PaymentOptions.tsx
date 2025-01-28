@@ -5,17 +5,15 @@ import { usePayment } from '../../hooks/usePayment';
 
 interface PaymentOptionsProps {
   price: number;
+  onPaymentComplete: () => void;
 }
 
-const PaymentOptions: React.FC<PaymentOptionsProps> = ({ price }) => {
-  const { selectedMethod, setSelectedMethod, handlePayment } = usePayment(price);
+const PaymentOptions: React.FC<PaymentOptionsProps> = ({ price, onPaymentComplete }) => {
+  const { handlePayment } = usePayment(price, onPaymentComplete);
 
   return (
     <div className="space-y-4">
-      <PaymentMethodSelector 
-        selectedMethod={selectedMethod}
-        onSelect={setSelectedMethod}
-      />
+      <PaymentMethodSelector />
       <PaymentSummary 
         price={price} 
         onPay={handlePayment}
@@ -24,4 +22,4 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({ price }) => {
   );
 };
 
-export default PaymentOptions;
+export default PaymentOptions

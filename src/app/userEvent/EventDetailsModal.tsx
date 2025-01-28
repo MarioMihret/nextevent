@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   X,
   Calendar,
@@ -30,6 +30,13 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   onClose,
 }) => {
   const isVirtual = !!event.meetingLink;
+  const [hasPaid, setHasPaid] = useState(false);
+
+  const handlePaymentComplete = () => {
+    setHasPaid(true);
+  };
+
+  const showJoinButton = isVirtual && (event.price === 0 || hasPaid);
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -90,10 +97,10 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
             </div>
           )}
 
-          {event.price > 0 && (
+          {event.price > 0 && !hasPaid && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-4">Payment Options</h3>
-              <PaymentOptions price={event.price} />
+              <PaymentOptions price={event.price} onPaymentComplete={handlePaymentComplete} />
             </div>
           )}
 
@@ -101,7 +108,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
             <button className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 rounded-lg text-white font-semibold transition-colors">
               Register Now
             </button>
-            {isVirtual && (
+            {showJoinButton && (
               <a
                 href={event.meetingLink}
                 target="_blank"
@@ -118,4 +125,4 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
   );
 };
 
-export default EventDetailsModal;
+export default EventDetailsModal
