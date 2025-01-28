@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import "./globals.css";
@@ -45,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <>
             <Navbar />
             <main className="relative z-10 mt-16">{children}</main>
-            {isHomePage && <Layout />} {/* Only render Layout on home page */}
+            {isHomePage && <Layout />} Only render Layout on home page
             <Footer />
           </>
         )}

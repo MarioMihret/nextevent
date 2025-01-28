@@ -1,1 +1,1 @@
-export type PaymentMethod = 'chapa' | 'cbe-birr';
+export type PaymentMethod = 'chapa' ;

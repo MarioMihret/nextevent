@@ -28,7 +28,7 @@ const Layout = () => {
       </div>
      
         <Partners />
-        <div className=" text-white">
+        <div className="text-white ">
         <CTA />
         </div>
       

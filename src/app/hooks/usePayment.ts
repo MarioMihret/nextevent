@@ -1,28 +1,37 @@
+// hooks/usePayment.ts
 import { useState } from 'react';
-import { PaymentMethod } from '../types/payment';
-import { initiateChapaPayment } from '../utils/payment';
 
-export const usePayment = (amount: number) => {
-  // Set the payment method to 'chapa' by default
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('chapa');
+export const usePayment = (price: number, onPaymentComplete: () => void) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handlePayment = async () => {
     try {
-      if (selectedMethod === 'chapa') {
-        // Only initiate Chapa payment
-        await initiateChapaPayment(amount);
-      } else {
-        // Handle unexpected cases or display an error
-        console.error('Unsupported payment method:', selectedMethod);
+      setLoading(true);
+      setError(null);
+      
+      // Logic for initiating payment goes here
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: price, email: 'user@example.com' }), // Example payload
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Payment initialization failed');
       }
-    } catch (error) {
-      console.error('Payment failed:', error);
+
+      // Call onPaymentComplete callback if payment is successful
+      onPaymentComplete();
+    } catch (err: any) {
+      setError(err?.message || 'Payment failed. Please try again.');
+      console.error('Payment error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return {
-    selectedMethod,
-    setSelectedMethod,
-    handlePayment
-  };
+  return { handlePayment, loading, error };
 };

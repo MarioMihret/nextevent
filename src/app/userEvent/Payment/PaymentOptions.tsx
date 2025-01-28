@@ -9,17 +9,19 @@ interface PaymentOptionsProps {
 }
 
 const PaymentOptions: React.FC<PaymentOptionsProps> = ({ price, onPaymentComplete }) => {
-  const { handlePayment } = usePayment(price, onPaymentComplete);
+  const { handlePayment, loading, error } = usePayment(price, onPaymentComplete);
 
   return (
     <div className="space-y-4">
       <PaymentMethodSelector />
       <PaymentSummary 
         price={price} 
-        onPay={handlePayment}
+        onPay={handlePayment} 
+        loading={loading} // Pass loading state to prevent multiple payments
+        error={error} // Display error message if payment fails
       />
     </div>
   );
 };
 
-export default PaymentOptions
+export default PaymentOptions;
