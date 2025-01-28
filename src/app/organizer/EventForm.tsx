@@ -21,11 +21,11 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create New Event</h2>
+        <h2 className="text-2xl font-bold text-white">Create New Event</h2>
         <button 
           type="button" 
           onClick={onClose}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-gray-400 hover:text-gray-200 transition-colors"
         >
           <X className="w-6 h-6" />
         </button>
@@ -33,30 +33,30 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Event Title</label>
+          <label className="block text-gray-300 mb-2">Event Title</label>
           <input
             name="title"
             type="text"
-            className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
             placeholder="Enter event title"
             required
           />
         </div>
 
         <div>
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Date</label>
+          <label className="block text-gray-300 mb-2">Date</label>
           <input
             name="date"
             type="datetime-local"
-            className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
             required
           />
         </div>
 
         <div className="flex flex-col">
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Event Type</label>
+          <label className="block text-gray-300 mb-2">Event Type</label>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <label className="flex items-center gap-2 text-white">
               <input
                 type="radio"
                 name="eventType"
@@ -67,7 +67,7 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
               />
               Physical Event
             </label>
-            <label className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <label className="flex items-center gap-2 text-white">
               <input
                 type="radio"
                 name="eventType"
@@ -83,11 +83,11 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
 
         {!isVirtual && (
           <div>
-            <label className="block text-gray-700 dark:text-gray-300 mb-2">Location</label>
+            <label className="block text-gray-300 mb-2">Location</label>
             <input
               name="location"
               type="text"
-              className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white"
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
               placeholder="Enter location"
               required={!isVirtual}
             />
@@ -95,11 +95,11 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
         )}
 
         <div>
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Ticket Price</label>
+          <label className="block text-gray-300 mb-2">Ticket Price</label>
           <input
             name="price"
             type="number"
-            className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
             placeholder="Enter price"
             min="0"
             step="0.01"
@@ -108,11 +108,11 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
         </div>
 
         <div>
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Maximum Attendees</label>
+          <label className="block text-gray-300 mb-2">Maximum Attendees</label>
           <input
             name="maxAttendees"
             type="number"
-            className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none"
             placeholder="Enter maximum attendees"
             min="1"
             required
@@ -120,10 +120,10 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">Description</label>
+          <label className="block text-gray-300 mb-2">Description</label>
           <textarea
             name="description"
-            className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-gray-900 dark:text-white h-32"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:border-purple-500 focus:outline-none h-32"
             placeholder="Enter event description"
             required
           />
@@ -134,13 +134,13 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
         <button
           type="button"
           onClick={onClose}
-          className="px-6 py-3 bg-gray-200 dark:bg-gray-700 rounded-lg text-gray-700 dark:text-white font-semibold hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-6 py-3 bg-gray-700 rounded-lg text-white font-semibold hover:bg-gray-600 transition-colors"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-white font-semibold hover:opacity-90"
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
         >
           Create Event
         </button>
@@ -148,4 +148,5 @@ const EventForm: React.FC<EventFormProps> = ({ onClose, onSubmit }) => {
     </form>
   );
 };
-export default EventForm; 
+
+export default EventForm;

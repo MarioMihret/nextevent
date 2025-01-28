@@ -23,11 +23,11 @@ const EventListItem: React.FC<EventListItemProps> = ({
   };
 
   return (
-    <div className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all">
+    <div className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-all">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-xl font-semibold text-white">{event.title}</h3>
-          <div className="flex items-center gap-4 mt-2 text-gray-400">
+          <div className="flex items-center gap-4 mt-2 text-gray-300">
             <span>{new Date(event.date).toLocaleString()}</span>
             {event.isVirtual ? (
               <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
               <Tooltip content="View Analytics">
                 <button 
                   onClick={() => onViewAnalytics(event.id)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-all"
+                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   <BarChart2 className="w-5 h-5 text-purple-400" />
                 </button>
@@ -67,7 +67,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
               <Tooltip content="Edit Event">
                 <button 
                   onClick={() => onEdit(event.id)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-all"
+                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   <Edit2 className="w-5 h-5 text-blue-400" />
                 </button>
@@ -75,7 +75,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
               <Tooltip content="Delete Event">
                 <button 
                   onClick={() => onDelete(event.id)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-all"
+                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-5 h-5 text-red-400" />
                 </button>

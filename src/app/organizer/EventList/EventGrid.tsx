@@ -7,7 +7,7 @@ interface EventGridProps {
   showJoinButton?: boolean;
 }
 
-const EventGrid: React.FC<EventGridProps> = ({
+const EventGrid = React.memo<EventGridProps>(({
   events,
   showJoinButton = true,
 }) => {
@@ -22,6 +22,8 @@ const EventGrid: React.FC<EventGridProps> = ({
       ))}
     </div>
   );
-};
+});
+
+EventGrid.displayName = 'EventGrid';
 
 export default EventGrid;
