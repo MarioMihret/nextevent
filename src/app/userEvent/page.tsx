@@ -1,19 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
-import EventCard from "./EventCard";
+import dynamic from 'next/dynamic';
 import SearchBar from "./SearchBar";
 import FilterSection from "./FilterSection";
 
+// Use dynamic import for client-side only components
+const EventCardWithNoSSR = dynamic(() => import('./EventCard'), {
+  ssr: false,
+});
+
 const UserDashboard = () => {
-  // State to track whether we're on the client or not
-  const [isClient, setIsClient] = useState(false);
-
-  // Use useEffect to set `isClient` to true after the component mounts
-  useEffect(() => {
-    setIsClient(true); // Set to true only in the client-side
-  }, []);
-
+  const [mounted, setMounted] = useState(false);
   const [events, setEvents] = useState([
     {
       id: "1",
@@ -48,6 +46,10 @@ const UserDashboard = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const filtered = events.filter(event => {
       const searchLower = searchTerm.toLowerCase();
       return (
@@ -77,22 +79,21 @@ const UserDashboard = () => {
     setFilteredEvents(filtered);
   };
 
-  // Conditional rendering based on client-side mounting
-  if (!isClient) {
-    return null; // Don't render anything during SSR
+  if (!mounted) {
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
-      <div className="container mx-auto px-6 py-20">
+      <div className="container px-6 py-20 mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col items-center justify-between gap-4 mb-8 md:flex-row">
           <h1 className="text-3xl font-bold text-white">Discover Events</h1>
           <div className="flex items-center gap-4">
             <SearchBar onSearch={handleSearch} />
             <button 
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 transition-colors rounded-lg bg-white/10 hover:bg-white/20"
             >
               <Filter className="w-4 h-4 text-purple-400" />
               <span className="text-white">Filters</span>
@@ -104,14 +105,14 @@ const UserDashboard = () => {
         {showFilters && <FilterSection onFilterChange={handleFilterChange} />}
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCardWithNoSSR key={event.id} event={event} />
           ))}
         </div>
 
         {filteredEvents.length === 0 && (
-          <div className="text-center py-12">
+          <div className="py-12 text-center">
             <p className="text-gray-400">No events found matching your criteria</p>
           </div>
         )}
@@ -120,5 +121,4 @@ const UserDashboard = () => {
   );
 };
 
-// Export as default
 export default UserDashboard;

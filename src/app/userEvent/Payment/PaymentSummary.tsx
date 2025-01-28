@@ -9,13 +9,9 @@ interface PaymentSummaryProps {
 const PaymentSummary: React.FC<PaymentSummaryProps> = ({ price, onPay }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-
   
   const serviceFee = price * 0.05;
   const total = price + serviceFee;
-
-  
 
   const handlePayment = async () => {
     try {
@@ -27,46 +23,64 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({ price, onPay }) => {
       // Prepare payment data
       const payload = {
         amount: total,
-        email: 'user@example.com', // In production, get from user session
-        first_name: 'John',        // In production, get from user session
-        last_name: 'Doe',          // In production, get from user session
+        email: 'user@example.com',
+        first_name: 'John',
+        last_name: 'Doe',
         tx_ref,
       };
 
-      console.log('Payment Payload:', payload); // Log payload to debug
+      console.log('Sending payment request:', payload);
 
-      // Send payment request to the backend
-      const response = await fetch('/api/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      try {
+        // Send payment request to the backend with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      const data = await response.json();
+        const response = await fetch('/api/payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
 
-      // Check if the response was successful
-      if (!response.ok) {
-        throw new Error(data?.error || 'Payment initialization failed');
+        clearTimeout(timeoutId);
+
+        const data = await response.json();
+
+        // If there's an error in the response
+        if (!response.ok) {
+          throw new Error(data.error || 'Payment initialization failed');
+        }
+
+        // Ensure checkout URL exists in response
+        const checkoutUrl = data?.data?.checkout_url;
+        if (!checkoutUrl) {
+          throw new Error('Invalid payment response - missing checkout URL');
+        }
+
+        console.log('Payment initialized successfully, redirecting to:', checkoutUrl);
+
+        // Redirect to Chapa checkout page
+        window.location.href = checkoutUrl;
+
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Request timed out. Please try again.');
+        }
+        throw fetchError;
       }
 
-      // Ensure checkout URL exists in response
-      const checkoutUrl = data?.data?.checkout_url;
-      if (!checkoutUrl) {
-        throw new Error('Invalid payment response - missing checkout URL');
-      }
-
-      // Redirect to Chapa checkout page
-      window.location.href = checkoutUrl;
-
-    } catch (err: any) {
-      // Handle errors gracefully and log to console
-      const errorMessage = err?.message || 'Payment failed. Please try again.';
+    } catch (err) {
+      // Handle errors gracefully
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Network error. Please check your connection and try again.';
       console.error('Payment error:', errorMessage);
       setError(errorMessage);
     } finally {
-      setLoading(false); // Ensure loading state is reset
+      setLoading(false);
     }
   };
 

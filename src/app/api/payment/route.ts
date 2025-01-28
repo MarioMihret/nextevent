@@ -15,9 +15,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { amount, email, first_name, last_name, tx_ref } = body;
 
+    // Log the received data for debugging
+    console.log('Received payment request:', { amount, email, first_name, last_name, tx_ref });
+
     // Validate required fields
     if (!amount || !email || !first_name || !last_name || !tx_ref) {
-      const error = 'Missing required payment information';
+      const missingFields = [];
+      if (!amount) missingFields.push('amount');
+      if (!email) missingFields.push('email');
+      if (!first_name) missingFields.push('first_name');
+      if (!last_name) missingFields.push('last_name');
+      if (!tx_ref) missingFields.push('tx_ref');
+
+      const error = `Missing required fields: ${missingFields.join(', ')}`;
       console.error(error, { body });
       return NextResponse.json({ error }, { status: 400 });
     }
@@ -29,9 +39,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
+    // Get the base URL for callbacks
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
     // Ensure callback_url and return_url are valid URLs
-    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/callback`;
-    const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/success`;
+    const callbackUrl = `${baseUrl}/api/payment/callback`;
+    const returnUrl = `${baseUrl}/payment/success`;
 
     // Check if these URLs are valid
     try {
@@ -58,6 +71,8 @@ export async function POST(request: Request) {
       }
     };
 
+    console.log('Sending payment request to Chapa:', paymentData);
+
     const response = await fetch(CHAPA_API_URL, {
       method: 'POST',
       headers: {
@@ -68,6 +83,7 @@ export async function POST(request: Request) {
     });
 
     const responseData = await response.json();
+    console.log('Chapa API response:', responseData);
 
     if (!response.ok) {
       console.error('Chapa API error:', responseData);
