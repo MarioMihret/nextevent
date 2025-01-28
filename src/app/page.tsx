@@ -1,8 +1,5 @@
-"use client"
+"use client";
+
 export default function Home() {
-  return (
-    <div>
-     
-    </div>
-  );
+  return null; // No content rendered
 }

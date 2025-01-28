@@ -24,10 +24,14 @@ const Layout = () => {
       </div>
       
       <div className="min-h-screen text-white bg-black " >
-      <Testimonials />
-      <Partners />
-      <CTA />
+        <Testimonials />
       </div>
+     
+        <Partners />
+        <div className=" text-white">
+        <CTA />
+        </div>
+      
       </>
   );
 };
