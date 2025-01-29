@@ -1,10 +1,13 @@
-"use client"
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, Calendar, Grid, List } from 'lucide-react';
-import { Event } from '../../types/event';
-import EventListItem from './EventListItem';
-import EventGrid from './EventGrid';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client";
+
+import React, { useState, useMemo } from "react";
+import { Search,  Calendar, Grid, List, Bell } from "lucide-react";
+import { Event } from "../../types/event";
+import EventListItem from "./EventListItem";
+import EventGrid from "./EventGrid";
+import { motion, AnimatePresence } from "framer-motion";
+import  ReminderSettings  from "@/app/organizer/EventReminders/ReminderSettings";
+import { useEventReminders } from "@/app/hooks/useEventReminders";
 
 interface EventListProps {
   events: Event[];
@@ -14,57 +17,72 @@ interface EventListProps {
   showActions?: boolean;
 }
 
-const EventList: React.FC<EventListProps> = ({ 
-  events, 
-  onEdit, 
-  onDelete, 
+const EventList: React.FC<EventListProps> = ({
+  events,
+  onEdit,
+  onDelete,
   onViewAnalytics,
-  showActions = true 
+  showActions = true,
 }) => {
-  const [view, setView] = useState<'list' | 'grid'>('list');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'completed'>('all');
+  const [view, setView] = useState<"list" | "grid">("list");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<"all" | "upcoming" | "ongoing" | "completed">("all");
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const filteredEvents = useMemo(() => {
     return events
-      .filter(event => {
-        const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            event.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesFilter = filter === 'all' || event.status === filter;
+      .filter((event) => {
+        const matchesSearch =
+          event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          event.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = filter === "all" || event.status === filter;
         return matchesSearch && matchesFilter;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [events, searchTerm, filter]);
 
+  // Reminder Hook
+  const { saveReminders } = useEventReminders(selectedEvent ?? {} as Event);
+
+  const handleSaveReminders = async (reminders: any) => {
+    try {
+      if (!selectedEvent) return;
+      await saveReminders(reminders);
+      alert("Reminders saved successfully!");
+    } catch (err) {
+      console.error("Failed to save reminders:", err);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Search and Filters Bar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-gray-800 p-4 rounded-lg">
+      <div className="flex flex-col gap-4 p-4 bg-gray-800 rounded-lg md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
           <input
             type="text"
             placeholder="Search events..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+            className="w-full py-2 pl-10 pr-4 text-white bg-gray-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none"
           />
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-gray-700 p-1 rounded-lg">
+          <div className="flex items-center gap-2 p-1 bg-gray-700 rounded-lg">
             <button
-              onClick={() => setView('list')}
+              onClick={() => setView("list")}
               className={`p-2 rounded-md transition-colors ${
-                view === 'list' ? 'bg-gray-600 text-purple-400' : 'text-gray-400 hover:text-white'
+                view === "list" ? "bg-gray-600 text-purple-400" : "text-gray-400 hover:text-white"
               }`}
             >
               <List className="w-5 h-5" />
             </button>
             <button
-              onClick={() => setView('grid')}
+              onClick={() => setView("grid")}
               className={`p-2 rounded-md transition-colors ${
-                view === 'grid' ? 'bg-gray-600 text-purple-400' : 'text-gray-400 hover:text-white'
+                view === "grid" ? "bg-gray-600 text-purple-400" : "text-gray-400 hover:text-white"
               }`}
             >
               <Grid className="w-5 h-5" />
@@ -72,9 +90,10 @@ const EventList: React.FC<EventListProps> = ({
           </div>
 
           <select
+            
             value={filter}
             onChange={(e) => setFilter(e.target.value as any)}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-purple-500 focus:outline-none"
+            className="px-4 py-2 text-white bg-gray-700 border border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none"
           >
             <option value="all">All Events</option>
             <option value="upcoming">Upcoming</option>
@@ -94,16 +113,16 @@ const EventList: React.FC<EventListProps> = ({
           transition={{ duration: 0.2 }}
         >
           {filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No events found</h3>
+            <div className="py-12 text-center">
+              <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="mb-2 text-xl font-semibold text-white">No events found</h3>
               <p className="text-gray-400">
-                {searchTerm ? 'Try adjusting your search terms' : 'Start by creating your first event'}
+                {searchTerm ? "Try adjusting your search terms" : "Start by creating your first event"}
               </p>
             </div>
-          ) : view === 'list' ? (
+          ) : view === "list" ? (
             <div className="space-y-4">
-              {filteredEvents.map(event => (
+              {filteredEvents.map((event) => (
                 <motion.div
                   key={event.id}
                   layout
@@ -117,6 +136,12 @@ const EventList: React.FC<EventListProps> = ({
                     onDelete={showActions ? onDelete : undefined}
                     onViewAnalytics={showActions ? onViewAnalytics : undefined}
                   />
+                  <button
+                    onClick={() => setSelectedEvent(event)}
+                    className="flex items-center mt-2 text-sm text-purple-400 hover:text-white"
+                  >
+                    <Bell className="w-4 h-4 mr-2" /> Set Reminders
+                  </button>
                 </motion.div>
               ))}
             </div>
@@ -125,6 +150,22 @@ const EventList: React.FC<EventListProps> = ({
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Reminder Settings Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="w-full max-w-lg p-6 bg-gray-900 rounded-lg shadow-lg">
+            <h2 className="mb-4 text-lg font-semibold text-white">Reminder Settings for {selectedEvent.title}</h2>
+            <ReminderSettings event={selectedEvent} onSaveReminders={handleSaveReminders} />
+            <button
+              onClick={() => setSelectedEvent(null)}
+              className="w-full mt-4 text-center text-gray-400 hover:text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
