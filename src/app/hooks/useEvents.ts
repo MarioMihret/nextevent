@@ -9,6 +9,7 @@ export const useEvents = () => {
     const isVirtual = formData.eventType === 'virtual';
     const meetingLink = isVirtual ? createJitsiMeetingLink(Date.now().toString()) : undefined;
 
+    // Add the visibility object
     const newEvent: Event = {
       id: Date.now().toString(),
       title: formData.title,
@@ -22,7 +23,11 @@ export const useEvents = () => {
       image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
       organizerId: '1', // In production, this would come from auth
       isVirtual,
-      status: 'upcoming'
+      status: 'upcoming',
+      visibility: {
+        isVisible: formData.isVisible || true, // Set default visibility as true
+        scheduledFor: formData.scheduledFor || undefined, // Optional scheduled visibility
+      },
     };
 
     setEvents(prev => [...prev, newEvent]);

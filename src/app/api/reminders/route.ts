@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Event } from '../../../types/event';
+import { Event } from '../../types/event';
 import { ReminderConfig } from '../../../app/organizer/EventReminders/ReminderSettings';
 
 // In a real application, you would use a proper email service

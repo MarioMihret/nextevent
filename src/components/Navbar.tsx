@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calendar, Menu, X, User, LogOut, Settings, Bell, Sun, Moon } from "lucide-react";
 import { useTheme } from "../app/contexts/ThemeContext";
+import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
 const NavLink = ({ href, children }) => {
   const pathname = usePathname();
@@ -41,8 +43,10 @@ const Navbar = () => {
   const menuRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   const isHomePage = pathname === "/";
+  const isLoading = status === "loading";
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -68,6 +72,23 @@ const Navbar = () => {
     return theme === "light" ? "bg-white shadow-md" : "bg-gray-900";
   };
 
+  const navLinks = [
+    { href: "/userEvent", label: "Events", showAlways: true },
+    { href: "/organizer", label: "Organizer", requiresAuth: true },
+    { href: "/admin", label: "Admin", requiresAdmin: true },
+  ];
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' });
+    setUserMenuOpen(false);
+  };
+
+  const userMenuItems = [
+    { icon: Bell, label: "Notifications", onClick: () => {} },
+    { icon: Settings, label: "Settings", onClick: () => {} },
+    { icon: LogOut, label: "Sign out", onClick: handleSignOut, className: "text-red-400" },
+  ];
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${getNavBackground()}`}>
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -80,13 +101,12 @@ const Navbar = () => {
           </Link>
 
           <div className="items-center hidden gap-6 md:flex">
-            {[
-              { href: "/userEvent", label: "Events" },
-              { href: "/organizer", label: "Organizer" },
-              { href: "/admin", label: "Admin" },
-            ].map(({ href, label }) => (
-              <NavLink key={href} href={href}>{label}</NavLink>
-            ))}
+            {navLinks.map(({ href, label, requiresAuth, requiresAdmin }) => {
+              if ((requiresAuth && !session) || (requiresAdmin && session?.user?.role !== 'admin')) {
+                return null;
+              }
+              return <NavLink key={href} href={href}>{label}</NavLink>;
+            })}
 
             <button
               onClick={toggleTheme}
@@ -100,40 +120,58 @@ const Navbar = () => {
               )}
             </button>
 
-            <div className="relative" ref={menuRef}>
+            {isLoading ? (
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+            ) : session ? (
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User avatar"}
+                      width={20}
+                      height={20}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-purple-400" />
+                  )}
+                  <span className={theme === "light" ? "text-gray-900" : "text-white"}>
+                    {session.user?.name || "User"}
+                  </span>
+                </button>
+                
+                {userMenuOpen && (
+                  <div className="absolute right-0 w-56 py-2 mt-2 bg-white rounded-lg shadow-lg dark:bg-gray-900 dark:bg-opacity-95 backdrop-blur-sm">
+                    {userMenuItems.map(({ icon: Icon, label, onClick, className }) => (
+                      <button
+                        key={label}
+                        onClick={onClick}
+                        className={`
+                          flex items-center w-full gap-2 px-4 py-2
+                          ${theme === "light" ? "text-gray-700" : "text-gray-300"}
+                          hover:bg-gray-100 dark:hover:bg-white/5
+                          ${className || ""}
+                        `}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                onClick={() => signIn()}
+                className="px-4 py-2 font-semibold text-white transition-colors rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90"
               >
-                <User className="w-5 h-5 text-purple-400" />
-                <span className={theme === "light" ? "text-gray-900" : "text-white"}>
-                  John Doe
-                </span>
+                Sign In
               </button>
-              
-              {userMenuOpen && (
-                <div className="absolute right-0 w-56 py-2 mt-2 rounded-lg shadow-lg bg-white dark:bg-gray-900 dark:bg-opacity-95 backdrop-blur-sm">
-                  {[
-                    { icon: Bell, label: "Notifications" },
-                    { icon: Settings, label: "Settings" },
-                    { icon: LogOut, label: "Logout", className: "text-red-400" },
-                  ].map(({ icon: Icon, label, className }) => (
-                    <button
-                      key={label}
-                      className={`
-                        flex items-center w-full gap-2 px-4 py-2
-                        ${theme === "light" ? "text-gray-700" : "text-gray-300"}
-                        hover:bg-gray-100 dark:hover:bg-white/5
-                        ${className || ""}
-                      `}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           <button
@@ -148,28 +186,30 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="px-2 pt-2 pb-3 space-y-1 md:hidden">
-            {[
-              { href: "/userEvent", label: "Events" },
-              { href: "/organizer", label: "Organizer" },
-              { href: "/admin", label: "Admin" },
-            ].map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`
-                  block px-3 py-2 rounded-md text-base font-medium
-                  ${pathname === href
-                    ? "bg-purple-400 text-white"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
-                  }
-                `}
+            {navLinks.map(({ href, label, requiresAuth, requiresAdmin }) => {
+              if ((requiresAuth && !session) || (requiresAdmin && session?.user?.role !== 'admin')) {
+                return null;
+              }
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className="block px-3 py-2 text-base font-medium text-gray-700 rounded-md dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
+                >
+                  {label}
+                </Link>
+              );
+            })}
+            {!session && (
+              <button
+                onClick={() => signIn()}
+                className="block w-full px-3 py-2 text-base font-medium text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10"
               >
-                {label}
-              </Link>
-            ))}
+                Sign In
+              </button>
+            )}
           </div>
         )}
       </div>
